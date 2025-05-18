@@ -1,0 +1,92 @@
+🧥✨ WebApp inteligente para combinación y prueba virtual de prendas
+🎯 Objetivo general
+Desarrollar una Single Page Application (SPA) que permita a los usuarios subir una prenda de ropa, obtener sugerencias compatibles basadas en análisis de color y tipo de prenda, y finalmente realizar una prueba virtual personalizada. La solución se enfoca en personalización, visualización interactiva y experiencia fluida, integrando capacidades de procesamiento de imagen e inteligencia artificial mediante APIs externas.
+
+🧭 Flujo funcional completo
+1. Subida y análisis de prenda original
+Finalidad: Obtener los colores dominantes de la prenda y generar combinaciones cromáticas viables.
+
+Funcionalidades:
+El usuario sube una imagen de una prenda.
+
+El sistema:
+
+Detecta automáticamente los colores predominantes usando procesamiento de imagen.
+
+Presenta una interfaz donde el usuario puede seleccionar el tipo de prenda a combinar (e.g., pantalones, camisas, chaquetas).
+
+Se aplica un algoritmo de combinación cromática (e.g., teoría del color + reglas de armonía como análogos, complementarios o tríadas) para generar una paleta de colores compatibles.
+
+Se construye una petición estructurada a una API externa (a definir) con:
+
+Los colores compatibles.
+
+El tipo de prenda a buscar.
+
+(Opcionalmente) un estilo o contexto estético si se desea enriquecer la búsqueda (urbano, formal, casual, etc.).
+
+2. Sugerencia y exploración de prendas compatibles
+Finalidad: Presentar una selección curada de prendas que encajen cromática y tipológicamente.
+
+Funcionalidades:
+Se muestra una galería de resultados devueltos por la API, filtrados por:
+
+Tipo de prenda deseado.
+
+Compatibilidad cromática con la prenda original.
+
+Para cada resultado se muestra:
+
+Imagen del producto.
+
+Nombre, marca, precio y enlace externo (si aplica).
+
+Botón para iniciar la prueba virtual.
+
+El usuario puede:
+
+Filtrar por tonalidades específicas.
+
+Ordenar por popularidad, precio o relevancia.
+
+Guardar favoritos o combinaciones en una lista personal.
+
+3. Prueba virtual personalizada
+Finalidad: Permitir al usuario visualizar cómo se vería con la prenda seleccionada de forma realista.
+
+Funcionalidades:
+El usuario sube una foto de cuerpo entero siguiendo indicaciones sobre postura, fondo y calidad.
+
+La imagen del usuario y la del producto se envían a una API de prueba virtual (por definir, e.g., TryOn o similar).
+
+La API devuelve una composición visual precisa, simulando la prenda sobre el cuerpo del usuario con ajuste morfológico.
+
+Se ofrece al usuario:
+
+Visualización del resultado en resolución alta.
+
+Comparación lado a lado con la prenda original.
+
+Opción de descargar, compartir o repetir el proceso con otra prenda.
+
+✅ Resumen del flujo
+Subo una imagen de mi camiseta → se detectan colores clave.
+
+Quiero combinarla con unos pantalones → me genera sugerencias de colores que pegan.
+
+Se envía la info a una API → me devuelve opciones reales que puedo comprar.
+
+Selecciono una prenda y me la pruebo virtualmente subiendo mi foto.
+
+Obtengo el resultado final → puedo compartirlo, descargarlo o seguir explorando.
+
+
+🧱 Arquitectura recomendada
+
+| Capa                          | Tecnología sugerida                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------- |
+| **Frontend**                  | React / Next.js (App Router) + Tailwind                                         |
+| **Backend                     | NextJS
+| **Base de datos (si aplica)** | MongoDB Atlas 								  |
+
+

@@ -1,103 +1,178 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState } from 'react'
+import Layout from './components/layout/Layout'
+import { ColorAnalysisService } from '@/lib/services/colorAnalysis'
+import { ColorAnalysis, Color } from '@/lib/types'
+import { generateSchemes } from '@/lib/services/combineColors'
+import HeroSection from './components/features/HomePage/HeroSection'
+import ResultsSection from './components/features/HomePage/ResultsSection'
+
+type FlowStep = 'upload' | 'selectColor' | 'selectCombination' | 'selectClothingType' | 'results'
+type ColorCombination = { type: string, colors: string[] }
+
+export default function HomePage() {
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [showResults, setShowResults] = useState(false)
+  const [colorAnalysis, setColorAnalysis] = useState<ColorAnalysis | null>(null)
+  const [selectedColor, setSelectedColor] = useState<Color | null>(null)
+  const [colorCombinations, setColorCombinations] = useState<ColorCombination[]>([])
+  const [selectedCombination, setSelectedCombination] = useState<ColorCombination | null>(null)
+  const [selectedClothingType, setSelectedClothingType] = useState<string>('')
+  const [step, setStep] = useState<FlowStep>('upload')
+
+  const resetState = () => {
+    setUploadedImage(null)
+    setColorAnalysis(null)
+    setSelectedColor(null)
+    setColorCombinations([])
+    setSelectedCombination(null)
+    setSelectedClothingType('')
+    setShowResults(false)
+    setStep('upload')
+  }
+
+  const processImage = async (dataUrl: string) => {
+    setUploadedImage(dataUrl)
+    
+    try {
+      const colorAnalysisService = ColorAnalysisService.getInstance()
+      const analysis = await colorAnalysisService.analyzeImage(dataUrl)
+      setColorAnalysis(analysis)
+      
+      setIsProcessing(false)
+      setStep('selectColor')
+      console.log('Color analysis complete:', analysis)
+    } catch (error) {
+      console.error('Error analyzing colors:', error)
+      setIsProcessing(false)
+    }
+  }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setIsProcessing(true)
+      resetState()
+      setStep('upload')
+      
+      const file = e.target.files[0]
+      const reader = new FileReader()
+      
+      reader.onload = async (event) => {
+        if (event.target) {
+          await processImage(event.target.result as string)
+        }
+      }
+      
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleSampleImageSelect = async (imageUrl: string) => {
+    setIsProcessing(true)
+    resetState()
+    setStep('upload')
+    
+    try {
+      const response = await fetch(imageUrl)
+      const blob = await response.blob()
+      const reader = new FileReader()
+      
+      reader.onload = async (event) => {
+        if (event.target) {
+          await processImage(event.target.result as string)
+        }
+      }
+      
+      reader.readAsDataURL(blob)
+    } catch (error) {
+      console.error('Error loading sample image:', error)
+      setIsProcessing(false)
+    }
+  }
+
+  const handleColorSelection = (color: Color) => {
+    setSelectedColor(color)
+    
+    const schemes = generateSchemes(color.hex)
+    const combinations = [
+      { type: 'Complementary', colors: [schemes.complementary] },
+      { type: 'Analogous', colors: schemes.analogous },
+      { type: 'Triadic', colors: schemes.triadic },
+      { type: 'Split Complementary', colors: schemes.splitComplementary },
+      { type: 'Tetradic', colors: schemes.tetradic }
+    ]
+    
+    setColorCombinations(combinations)
+    setStep('selectCombination')
+  }
+
+  const handleCombinationSelection = (combination: ColorCombination) => {
+    setSelectedCombination(combination)
+    setStep('selectClothingType')
+  }
+
+  const handleClothingTypeSelection = async (type: string) => {
+    setSelectedClothingType(type)
+    setIsProcessing(true)
+    
+    try {
+      // No need to do anything else here - the colors will be used in ResultsSection
+      setIsProcessing(false)
+      setShowResults(true)
+      setStep('results')
+    } catch (error) {
+      console.error('Error processing clothing type selection:', error)
+      setIsProcessing(false)
+    }
+  }
+
+  const handleBack = () => {
+    switch (step) {
+      case 'selectColor':
+        setUploadedImage(null)
+        setStep('upload')
+        break
+      case 'selectCombination':
+        setStep('selectColor')
+        break
+      case 'selectClothingType':
+        setStep('selectCombination')
+        break
+      case 'results':
+        setStep('selectClothingType')
+        break
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <Layout>
+      <HeroSection
+        uploadedImage={uploadedImage}
+        isProcessing={isProcessing}
+        step={step}
+        onImageUpload={handleImageUpload}
+        onReset={resetState}
+        colorAnalysis={colorAnalysis}
+        selectedColor={selectedColor}
+        colorCombinations={colorCombinations}
+        selectedCombination={selectedCombination}
+        selectedClothingType={selectedClothingType}
+        onColorSelection={handleColorSelection}
+        onCombinationSelection={handleCombinationSelection}
+        onClothingTypeSelection={handleClothingTypeSelection}
+        onBack={handleBack}
+        showResults={showResults}
+        onSampleImageSelect={handleSampleImageSelect}
+      />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      <ResultsSection
+        showResults={showResults}
+        step={step}
+        clotheType={selectedClothingType}
+        colorHexCodes={selectedCombination?.colors || []}
+      />
+    </Layout>
+  )
 }
