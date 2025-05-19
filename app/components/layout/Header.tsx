@@ -14,7 +14,7 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white">
-      <nav className="container mx-auto px-4 py-4">
+      <nav className="container mx-auto px-4 ">
         <div className="flex items-center justify-center">
           <Link href="/" className="text-2xl font-bold" style={{ color: colors.primary }}>
             <Image src="/logo.png" alt="Match Clothes App" width={100} height={100} className="mr-15" />
