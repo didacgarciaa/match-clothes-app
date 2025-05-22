@@ -22,11 +22,9 @@ export class ProductService {
 
   async getProductsByTypeAndColor(type: string, colors: string): Promise<Product[]> {
     try {
-      // Ensure colors are properly formatted with # prefix
-      // Colors can be a comma-separated string from selectedCombination.colors
       const formattedColors = colors.split(',')
         .map(color => color.trim())
-        .filter(color => color.length > 0) // Filter out empty strings
+        .filter(color => color.length > 0)
         .map(color => color.startsWith('#') ? color : `#${color}`)
         .join(',');
 
