@@ -5,8 +5,8 @@ import Layout from './components/layout/Layout'
 import { ColorAnalysisService } from '@/lib/services/colorAnalysis'
 import { ColorAnalysis, Color } from '@/lib/types'
 import { generateSchemes } from '@/lib/services/combineColors'
-import HeroSection from './components/features/HomePage/HeroSection'
-import ResultsSection from './components/features/HomePage/ResultsSection'
+import HeroSection from './components/HomePage/HeroSection'
+import ResultsSection from './components/HomePage/ResultsSection'
 
 type FlowStep = 'upload' | 'selectColor' | 'selectCombination' | 'selectClothingType' | 'results'
 type ColorCombination = { type: string, colors: string[] }
